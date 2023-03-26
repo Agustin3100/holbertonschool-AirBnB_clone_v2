@@ -2,9 +2,14 @@
 """Place class."""
 import models
 from models.base_model import BaseModel, Base
-from sqlalchemy import Column, Integer, String, Float, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, Table
 from os import getenv
 from sqlalchemy.orm import relationship
+from models.amenity import Amenity
+
+    place_amenity = Table('place_amenity', Base.metadata,
+            Column('place_id', String(60), ForeignKey('places.id'), primary_key=True, nullable=False)
+            Column('amenity_id', String(60), ForeignKey('amenities.id'), primary_key=True, nullable=False))
 
 class Place(BaseModel, Base):
     """Place class."""
@@ -20,11 +25,22 @@ class Place(BaseModel, Base):
     latitude = Column(Float, nullable=True)
     longitude = Column(Float, nullable=True)
     
+    
 
     if getenv('HBNB_TYPE_STORAGE') == 'db':
         reviews = relationship('Review', backref='place', cascade='all, delete-orphan')
+        amenities = relationship('Amenity', secondary='place_amenity', backref='place', viewonly=False)
 
     else:
         @property
         def reviews(self):
             review_instances = [instance for instance in models.storage.all() if place_id == Place.id]
+
+        @property
+            def amenities(self):
+                amenity_instances = [instances for instances in models.storage.all() if amenity_ids == Amenity.id]
+
+        @amenities.setter
+        def amenities(self, obj):
+            if isinstance(obj, Amenity):
+                self.amenity_ids.append(obj.id)
