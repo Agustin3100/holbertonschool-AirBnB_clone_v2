@@ -27,4 +27,4 @@ class Place(BaseModel, Base):
     else:
         @property
         def reviews(self):
-            review_instances = [instance for instance in models.storage.all() if place_id = Place.id]
+            review_instances = [instance for instance in models.storage.all() if place_id == Place.id]
