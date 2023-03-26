@@ -1,70 +1,73 @@
 #!/usr/bin/python3
-from os import getenv, environ
-from models.base_model import Base
+"""This module defines the DBStorage class"""
+
+import os
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, query, scoped_session
+from sqlalchemy.orm import sessionmaker, scoped_session
+from models.base_model import Base
+from models.user import User
+from models.state import State
 from models.city import City
+from models.amenity import Amenity
 from models.place import Place
 from models.review import Review
-from models.state import State
-from models.user import User
-from models.base_model import BaseModel
-from models.amenity import Amenity
 
 
 class DBStorage:
-    """class for database storage"""
+    """Representative of the interface to the database."""
     __engine = None
     __session = None
 
     def __init__(self):
-        """Initialize DBStorage."""
-        user = environ["HBNB_MYSQL_USER"]
-        password = environ["HBNB_MYSQL_PWD"]
-        host = environ["HBNB_MYSQL_HOST"]
-        database = environ["HBNB_MYSQL_DB"]
+        """Initialize DBStorage class."""
+        user = os.getenv('HBNB_MYSQL_USER')
+        pwd = os.getenv('HBNB_MYSQL_PWD')
+        host = os.getenv('HBNB_MYSQL_HOST', 'localhost')
+        db = os.getenv('HBNB_MYSQL_DB')
+        env = os.getenv('HBNB_ENV')
 
-        self.__engine = create_engine(
-                "mysql+mysqldb://{}:{}@{}/{}".format(
-                    user, password, host, database),
-                echo=False, pool_pre_ping=True)
-
-        if getenv("HBNB_ENV") == "test":
-            base.metadata.drop_all(self.__engine)
+        self.__engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'
+                                       .format(user, pwd, host, db),
+                                       pool_pre_ping=True)
+        if env == "test":
+            Base.metadata.drop_all(self.__engine)
 
     def all(self, cls=None):
-        """Return requested type of object if not specified retun all."""
-        all_dict = {}
-        if cls is None:
-            obj = self.__session.query(State).all()
-            obj.extend(self.__session.query(User).all())
-            obj.extend(self.__session.query(Review).all())
-            obj.extend(self.__session.query(Place).all())
-            obj.extend(self.__session.query(City).all())
-            obj.extend(self.__session.query(Amenity).all())
+        """Query on the current database session."""
+        data = {}
+        if cls:
+            query = self.__session.query(cls).all()
+            for item in query:
+                key = "{}.{}".format(item.__class__.__name__, item.id)
+                data[key] = item
         else:
-            obj = (self.__session.query(cls).all())
-        for item in obj:
-            all_dict[f"{item.__class__.__name__}.{item.id}"] = item
-        return all_dict
+            classes = [State, City, User, Place, Review, Amenity]
+            for cls in classes:
+                query = self.__session.query(cls).all()
+                for item in query:
+                    key = "{}.{}".format(item.__class__.__name__, item.id)
+                    data[key] = item
+        return data
 
     def new(self, obj):
-        """Add object to database session."""
+        """Add the object to the current database session."""
         self.__session.add(obj)
 
     def save(self):
-        """Save changes to database."""
+        """Commit all changes of the current database session."""
         self.__session.commit()
 
     def delete(self, obj=None):
-        """Delete objects from the database."""
+        """Delete from the current database session obj if not None."""
         if obj:
             self.__session.delete(obj)
 
     def reload(self):
-        """Push objects to database."""
+        """Create all tables in the database."""
         Base.metadata.create_all(self.__engine)
         session_factory = sessionmaker(bind=self.__engine,
                                        expire_on_commit=False)
         Session = scoped_session(session_factory)
         self.__session = Session()
+
+
