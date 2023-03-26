@@ -7,8 +7,8 @@ from os import getenv
 from sqlalchemy.orm import relationship
 from models.amenity import Amenity
 
-    place_amenity = Table('place_amenity', Base.metadata,
-            Column('place_id', String(60), ForeignKey('places.id'), primary_key=True, nullable=False)
+place_amenity = Table('place_amenity', Base.metadata,
+            Column('place_id', String(60), ForeignKey('places.id'), primary_key=True, nullable=False),
             Column('amenity_id', String(60), ForeignKey('amenities.id'), primary_key=True, nullable=False))
 
 class Place(BaseModel, Base):
@@ -37,8 +37,8 @@ class Place(BaseModel, Base):
             review_instances = [instance for instance in models.storage.all() if place_id == Place.id]
 
         @property
-            def amenities(self):
-                amenity_instances = [instances for instances in models.storage.all() if amenity_ids == Amenity.id]
+        def amenities(self):
+            amenity_instances = [instances for instances in models.storage.all() if amenity_ids == Amenity.id]
 
         @amenities.setter
         def amenities(self, obj):
