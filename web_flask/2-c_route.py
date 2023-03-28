@@ -21,7 +21,7 @@ def display2(name=None):
 def depending(text):
     """Display C and value of text."""
     text2 = text.replace('_', ' ')
-    return f'C {text2}'
+    return 'C {}'.format(text2)
 
 
 if __name__ == '__main__':
