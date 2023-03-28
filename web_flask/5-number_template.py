@@ -41,7 +41,7 @@ def isint(n):
 @app.route('/number_template/<int:n>', strict_slashes=False)
 def templateifn(n):
     """Print number in template."""
-    return render_template('index.html', n=n)
+    return render_template('5-number.html', n=n)
 
 
 if __name__ == "__main__":
