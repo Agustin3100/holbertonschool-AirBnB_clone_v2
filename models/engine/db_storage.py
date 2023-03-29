@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""This module defines the DBStorage class"""
+"""This module defines the DBStorage class."""
 
 import os
 from sqlalchemy import create_engine
@@ -15,6 +15,7 @@ from models.review import Review
 
 class DBStorage:
     """Representative of the interface to the database."""
+
     __engine = None
     __session = None
 
@@ -74,4 +75,3 @@ class DBStorage:
     def close(self):
         """Call close method on session."""
         self.__session.close()
-
