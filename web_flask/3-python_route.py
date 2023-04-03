@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 """Python is cool!."""
 from flask import Flask
 
